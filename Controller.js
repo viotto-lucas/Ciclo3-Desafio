@@ -161,6 +161,14 @@ app.get('/listapedidos', async(req, res)=>{
     });
 });
 
+app.get('/listaitempedidos', async(req, res)=>{
+    await itempedido.findAll({
+        raw: true
+    }).then(function(itempedidos){
+        res.json({itempedidos})
+    });
+});
+
 app.get('/listaprodutos', async(req, res)=>{
     await produto.findAll({
         order: [['nome', 'ASC']]
@@ -174,6 +182,14 @@ app.get('/listacompras', async(req, res)=>{
         raw: true
     }).then(function(compras){
         res.json({compras})
+    });
+});
+
+app.get('/listaitemcompras', async(req, res)=>{
+    await itemcompra.findAll({
+        raw: true
+    }).then(function(itemcompras){
+        res.json({itemcompras})
     });
 });
 

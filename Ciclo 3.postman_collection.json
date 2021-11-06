@@ -381,6 +381,15 @@
 			"response": []
 		},
 		{
+			"name": "CadListaItemPedidos",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": null
+			},
+			"response": []
+		},
+		{
 			"name": "EditarItemPed",
 			"request": {
 				"method": "PUT",
@@ -544,6 +553,15 @@
 						}
 					}
 				},
+				"url": null
+			},
+			"response": []
+		},
+		{
+			"name": "CadListaItemCompras",
+			"request": {
+				"method": "GET",
+				"header": [],
 				"url": null
 			},
 			"response": []
