@@ -472,7 +472,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"id\": 3,\r\n    \"nome\": \"Monitor\",\r\n    \"descricao\": \"Monitor Dell UltraSharp de 23.8” U2422H\",\r\n    \"createdAt\": \"2021-11-05T00:39:31.000Z\",\r\n    \"updatedAt\": \"2021-11-05T00:39:31.000Z\"\r\n}",
+					"raw": "{\r\n    \"id\": 3,\r\n    \"nome\": \"Monitor\",\r\n    \"descricao\": \"23.6 Acer FullHD,Free Sync,144Hz, 1ms, Incl.\",\r\n    \"createdAt\": \"2021-11-05T00:39:31.000Z\",\r\n    \"updatedAt\": \"2021-11-05T00:39:31.000Z\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -563,6 +563,65 @@
 				"method": "GET",
 				"header": [],
 				"url": null
+			},
+			"response": []
+		},
+		{
+			"name": "ServicosPedidos",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3001/servico/3/pedidos",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3001",
+					"path": [
+						"servico",
+						"3",
+						"pedidos"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "ConsultaPedidosCliente",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": null
+			},
+			"response": []
+		},
+		{
+			"name": "EditPedido",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"id\": 5,\r\n    \"data\": \"2021-11-05\",\r\n    \"ClienteId\": 3,\r\n    \"createdAt\": \"2021-11-05T13:32:04.000Z\",\r\n    \"updatedAt\": \"2021-11-05T13:32:04.000Z\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3001/pedidos/5",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3001",
+					"path": [
+						"pedidos",
+						"5"
+					]
+				}
 			},
 			"response": []
 		}

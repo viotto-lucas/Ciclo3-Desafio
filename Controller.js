@@ -4,6 +4,7 @@ const cors = require('cors');
 const {Sequelize} = require('./models');
 
 const models = require('./models');
+const { response } = require('express');
 
 const app=express();
 app.use(cors());
@@ -171,7 +172,8 @@ app.get('/listaitempedidos', async(req, res)=>{
 
 app.get('/listaprodutos', async(req, res)=>{
     await produto.findAll({
-        order: [['nome', 'ASC']]
+        raw:true
+        // order: [['nome', 'ASC']]
     }).then(function(produtos){
         res.json({produtos})
     });
@@ -238,9 +240,43 @@ app.get('/servico/:id', async(req, res)=>{
     });
 });
 
-app.get('/cliente/:id', async(req, res)=>{
+app.get('/servico/:id/pedidos', async(req, res)=>{
+    await itempedido.findAll({
+        where: {PedidoId: req.params.id}})
+    .then(item =>{
+        return res.json({
+            error: false,
+            item
+        });
+    }).catch(function(erro){
+        return res.status(400).json({
+            error: true,
+            message: "Erro: não foi possível conectar!"
+        });
+    });
+});
+
+app.get('/produto/:id/compras', async(req, res)=>{
+    await itemcompra.findAll({
+        where: {CompraId: req.params.id}})
+    .then(item =>{
+        return res.json({
+            error: false,
+            item
+        });
+    }).catch(function(erro){
+        return res.status(400).json({
+            error: true,
+            message: "Erro: não foi possível conectar!"
+        });
+    });
+});
+
+app.get('/clientes/:id', async(req, res)=>{
     await cliente.findByPk(req.params.id)
     .then(client =>{
+        console.log('CLIENTE', client)
+        const resp = client.dataValues
         return res.json({
             error: false,
             client
@@ -259,6 +295,36 @@ app.get('/pedido/:id', async(req, res)=>{
         return res.json({
             error: false,
             ped
+        });
+    }).catch(function(erro){
+        return res.status(400).json({
+            error: true,
+            message: "Erro: não foi possível conectar!"
+        });
+    });
+});
+
+app.get('/item-pedido/:id', async(req, res)=>{
+    await itempedido.findByPk(req.params.id)
+    .then(itemped =>{
+        return res.json({
+            error: false,
+            itemped
+        });
+    }).catch(function(erro){
+        return res.status(400).json({
+            error: true,
+            message: "Erro: não foi possível conectar!"
+        });
+    });
+});
+
+app.get('/item-compra/:id', async(req, res)=>{
+    await itemcompra.findByPk(req.params.id)
+    .then(itemcomp =>{
+        return res.json({
+            error: false,
+            itemcomp
         });
     }).catch(function(erro){
         return res.status(400).json({
@@ -299,16 +365,37 @@ app.get('/compra/:id', async(req, res)=>{
 });
 
 app.get('/pedidos/:id', async(req, res)=>{
-    await pedido.findByPk(req.params.id,{include:[{all: true}]})
+    await pedido.findByPk(req.params.id)
     .then(ped=>{
-        return res.json({ped});
+        return res.json(ped.dataValues);
     })
 })
 
+app.get('/servicos/:id', async(req, res)=>{
+    await servico.findByPk(req.params.id)
+    .then(serv=>{
+        return res.json(serv.dataValues);
+    })
+})
+
+// app.get('/compras/:id', async(req, res)=>{
+//     await compra.findByPk(req.params.id,{include:[{all: true}]})
+//     .then(comp=>{
+//         return res.json({comp});
+//     })
+// })
+
 app.get('/compras/:id', async(req, res)=>{
-    await compra.findByPk(req.params.id,{include:[{all: true}]})
+    await compra.findByPk(req.params.id)
     .then(comp=>{
-        return res.json({comp});
+        return res.json(comp.dataValues);
+    })
+})
+
+app.get('/produtos/:id', async(req, res)=>{
+    await produto.findByPk(req.params.id)
+    .then(prod=>{
+        return res.json(prod.dataValues);
     })
 })
 
@@ -340,6 +427,168 @@ app.put('/pedidos/:id/editaritem', async(req, res)=>{
             error: false,
             message: "Pedido alterado com sucesso!",
             itens
+        });
+    }).catch(function(erro){
+        return res.status(400).json({
+            error : true,
+            message: "Erro: não foi possível alterar."
+        });
+    });
+});
+
+app.put('/pedidos/:id', async(req, res)=>{
+    const ped={
+        data: req.body.data,
+        ClienteId: req.body.ClienteId
+    };
+    if (!await cliente.findByPk(req.body.ClienteId)){
+        return res.status(400).json({
+            error: true,
+            message: 'Cliente não foi encontrado.'
+        });
+    };
+    if (!await pedido.findByPk(req.params.id)){
+        return res.status(400).json({
+            error: true,
+            message: 'Pedido não foi encontrado.'
+        });
+    };
+    await pedido.update(ped, {
+        where: Sequelize.and(
+            {id: req.params.id})
+    }).then(pedidos =>{
+        return res.json({
+            error: false,
+            message: "Pedido alterado com sucesso!",
+            pedidos
+        });
+    }).catch(function(erro){
+        return res.status(400).json({
+            error : true,
+            message: "Erro: não foi possível alterar."
+        });
+    });
+});
+
+app.put('/clientes/:id', async(req, res)=>{
+    console.log('BODY',req.body)
+    console.log('ID CLIENTE',req.params.id)
+    const client={
+        nome: req.body.nome,
+        endereco: req.body.endereco,
+        cidade: req.body.cidade,
+        UF: req.body.uf,
+        nascimento: req.body.nascimento,
+        clienteDesde: req.body.clienteDesde
+    };
+    console.log('ERROR', client)
+    if (!await cliente.findByPk(req.params.id)){
+        return res.status(400).json({
+            error: true,
+            message: 'Cliente não foi encontrado.'
+        });
+    };
+    await cliente.update(client, {
+        where: Sequelize.and(
+            {id: req.params.id})
+    }).then(clientes =>{
+        return res.json({
+            error: false,
+            message: "Cliente alterado com sucesso!",
+            clientes
+        });
+    }).catch(function(erro){
+        return res.status(400).json({
+            error : true,
+            message: "Erro: não foi possível alterar."
+        });
+    });
+});
+
+app.put('/servicos/:id', async(req, res)=>{
+    console.log('BODY',req.body)
+    console.log('ID CLIENTE',req.params.id)
+    const serv={
+        nome: req.body.nome,
+        descricao: req.body.descricao
+    };
+    console.log('ERROR', serv)
+    if (!await servico.findByPk(req.params.id)){
+        return res.status(400).json({
+            error: true,
+            message: 'Serviço não foi encontrado.'
+        });
+    };
+    await servico.update(serv, {
+        where: Sequelize.and(
+            {id: req.params.id})
+    }).then(servicos =>{
+        return res.json({
+            error: false,
+            message: "Serviço alterado com sucesso!",
+            servicos
+        });
+    }).catch(function(erro){
+        return res.status(400).json({
+            error : true,
+            message: "Erro: não foi possível alterar."
+        });
+    });
+});
+
+app.put('/compras/:id', async(req, res)=>{
+    console.log('BODY',req.body)
+    console.log('ID CLIENTE',req.params.id)
+    const comp={
+        data: req.body.data,
+        ClienteId: req.body.ClienteId
+    };
+    console.log('ERROR', comp)
+    if (!await compra.findByPk(req.params.id)){
+        return res.status(400).json({
+            error: true,
+            message: 'Compra não foi encontrada.'
+        });
+    };
+    await compra.update(comp, {
+        where: Sequelize.and(
+            {id: req.params.id})
+    }).then(compras =>{
+        return res.json({
+            error: false,
+            message: "Compra alterada com sucesso!",
+            compras
+        });
+    }).catch(function(erro){
+        return res.status(400).json({
+            error : true,
+            message: "Erro: não foi possível alterar."
+        });
+    });
+});
+
+app.put('/produtos/:id', async(req, res)=>{
+    console.log('BODY',req.body)
+    console.log('ID CLIENTE',req.params.id)
+    const prod={
+        nome: req.body.nome,
+        descricao: req.body.descricao
+    };
+    console.log('ERROR', prod)
+    if (!await produto.findByPk(req.params.id)){
+        return res.status(400).json({
+            error: true,
+            message: 'Produto não foi encontrado.'
+        });
+    };
+    await produto.update(prod, {
+        where: Sequelize.and(
+            {id: req.params.id})
+    }).then(produtos =>{
+        return res.json({
+            error: false,
+            message: "Produto alterado com sucesso!",
+            produtos
         });
     }).catch(function(erro){
         return res.status(400).json({
@@ -494,6 +743,72 @@ app.get('/excluirproduto/:id', async(req, res)=>{
         return res.status(400).json({
             error: true,
             message: "Erro ao excluir o produto."
+        });
+    });
+});
+
+app.get('/excluiritempedido/:id', async(req, res)=>{
+    await itempedido.destroy({
+        where: {id: req.params.id}
+    }).then(function(){
+        return res.json({
+            error: false,
+            message: "Item do pedido foi excluído com sucesso!"
+        });
+    }).catch(function(erro){
+        return res.status(400).json({
+            error: true,
+            message: "Erro ao excluir item do pedido."
+        });
+    });
+});
+
+app.get('/excluiritemcompra/:id', async(req, res)=>{
+    await itemcompra.destroy({
+        where: {id: req.params.id}
+    }).then(function(){
+        return res.json({
+            error: false,
+            message: "Item da compra foi excluído com sucesso!"
+        });
+    }).catch(function(erro){
+        return res.status(400).json({
+            error: true,
+            message: "Erro ao excluir item da compra."
+        });
+    });
+});
+
+app.get('/cliente/:id/pedidos', async(req,res)=>{
+    await pedido.findAll({
+        where: {ClienteId : req.params.id}
+    })
+    .then(ped=>{
+        return res.json({
+            error: false,
+            ped
+        });
+    }).catch(erro =>{
+        return res.status(400).json({
+            error:true,
+            message: "Não foi possível retornar pedidos."
+        });
+    });
+});
+
+app.get('/cliente/:id/compras', async(req,res)=>{
+    await compra.findAll({
+        where: {ClienteId : req.params.id}
+    })
+    .then(comp=>{
+        return res.json({
+            error: false,
+            comp
+        });
+    }).catch(erro =>{
+        return res.status(400).json({
+            error:true,
+            message: "Não foi possível retornar pedidos."
         });
     });
 });
